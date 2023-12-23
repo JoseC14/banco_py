@@ -1,11 +1,10 @@
 
-saldo         = 0
 LIMITES_SAQUE = 3
 MAXIMO_SAQUE  = 500
 numeros_saque = 0
 deposito      = 0
-saques        = 0
 transacao     = 0
+saques        = 0
 extrato       = ""
 opcao         = ""
 menu          = """
@@ -17,7 +16,32 @@ menu          = """
     (q) Sair do Sistema
 """
 
+def sacar(valor,saques,LIMITES_SAQUE, /):
+    global deposito
+    global extrato
+    while True:
+        if valor > deposito:
+            print("Erro! Você não tem saldo suficiente na conta.")
+            break
+        elif valor > MAXIMO_SAQUE:
+            print("Erro! Saques permitidos apenas até 500 reais.")
+            break
+        elif saques >= LIMITES_SAQUE:
+            print("Erro! Limite de Saques Diários atingido!")
+        else:
+            deposito -= valor
+            saques   += 1
+            print("Saque efetuado com sucesso!")
+            extrato = extrato + "Saque: R$"+str(valor)+"\n"
+            break
 
+
+def depositar(*,transacao): 
+    global deposito
+    global extrato
+    deposito += transacao
+    print("Depósito feito com sucesso!")
+    extrato = extrato + "Depósito: R$"+str(transacao)+"\n"
 
 while True:
     print(menu)
@@ -25,29 +49,15 @@ while True:
     opcao = input()
     if opcao == "s":
         print("SAQUE")
-        while True:
-            print("Quanto deseja sacar?")
-            transacao = float(input())
-            if transacao > deposito:
-                print("Erro! Você não tem saldo suficiente na conta.")
-                break
-            elif transacao > MAXIMO_SAQUE:
-                print("Erro! Saques permitidos apenas até 500 reais.")
-            elif saques >= LIMITES_SAQUE:
-                print("Erro! Limite de Saques Diários atingido!")
-            else:
-                deposito -= transacao
-                saques   += 1
-                print("Saque efetuado com sucesso!")
-                extrato = extrato + "Saque: "+str(transacao)+"\n"
-                break
+        transacao = float(input())
+        sacar(transacao,saques,LIMITES_SAQUE)
     elif opcao == "d":
         print("DEPÓSITO")
         print("Quanto deseja depositar")
         transacao = float(input())
-        deposito += transacao
-        print("Depósito feito com sucesso!")
-        extrato = extrato + "Depósito: "+str(transacao)+"\n"
+        depositar(transacao=transacao)
+        print(f"Saldo atual:{deposito}")
+
     elif opcao == "e":
         print("EXTRATO")
         print(extrato)
