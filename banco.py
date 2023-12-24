@@ -15,17 +15,19 @@ menu          = """
     (e) Extrato
     (cu) Criar Usuário
     (cc) Criar Conta
-    (l) Listar Clientes
-    (l) Listar Contas
+    (lu) Listar Usuários
+    (lc) Listar Contas
     (q) Sair do Sistema
 """
 usuarios = []
 contas   = []
-def sacar(valor,saques,LIMITES_SAQUE, /):
-    global deposito
+
+#OPERAÇÕES BANCÁRIAS
+def sacar(valor,saques,LIMITES_SAQUE,numero_agencia, /):
     global extrato
+    conta = acha_agencia(numero_agencia)
     while True:
-        if valor > deposito:
+        if valor > conta["Saldo"]:
             print("Erro! Você não tem saldo suficiente na conta.")
             break
         elif valor > MAXIMO_SAQUE:
@@ -34,21 +36,22 @@ def sacar(valor,saques,LIMITES_SAQUE, /):
         elif saques >= LIMITES_SAQUE:
             print("Erro! Limite de Saques Diários atingido!")
         else:
-            deposito -= valor
+            conta["Saldo"] -= valor
             saques   += 1
             print("Saque efetuado com sucesso!")
             extrato = extrato + "Saque: R$"+str(valor)+"\n"
             break
 
 
-def depositar(*,transacao): 
-    global deposito
+def depositar(*,transacao,numero_agencia): 
     global extrato
-    deposito += transacao
+    conta = acha_agencia(numero_agencia)
+    conta["Saldo"] += transacao
     print("Depósito feito com sucesso!")
     extrato = extrato + "Depósito: R$"+str(transacao)+"\n"
 
 
+#OPERAÇÕES DE CRIAR CONTAS
 def criar_usuario(usuarios):
     nome                  = input("Digite seu nome: ")
     data_nascimento       = input("Digite sua data de nascimento: ")
@@ -76,24 +79,9 @@ def criar_usuario(usuarios):
         "Endereço":endereco
     }))
 
-def checa_repetido(cpf,clientes):
-    if clientes:
-        for k,v in clientes[0].items():
-            if v == cpf:
-                return True
-            else: 
-                return False
-
-def lista_clientes(clientes):
-    for cliente in clientes:
-        for k,v in cliente.items():
-            print(f"{k} : {v}")
-    print("-------------------------------------")
-
-
 def criar_conta(contas):
-    agencia = input("Digite o número da agência: ")
-    numero_conta = input("Digite o número da conta(XXXX): ")
+    numero_conta = input("Digite o número da conta: ")
+    agencia      = input("Digite o número da agência(XXXX): ")
     while True:
         cpf = input("Digite o CPF da sua conta cadastrada: ")
         if(not achaCliente(cpf)):
@@ -102,17 +90,56 @@ def criar_conta(contas):
             break
 
     contas.append({
-        "Agência: ": agencia,
         "Número da Conta": numero_conta,
-        "CPF do Usuário" : cpf 
+        "Agência": agencia,
+        "CPF" : cpf,
+        "Saldo" : 0
     })
 
+#OPERAÇÕES DE CHECAGEM
+def checa_repetido(cpf,clientes):
+    if clientes:
+        for cliente in clientes:
+            for k,v in cliente:        
+                if v == cpf:
+                    return True
+                else: 
+                    return False
+
+def checa_agencia(numero_agencia):
+    for conta in contas:
+        if conta["Número da Conta"] == numero_agencia:
+            return True
+        else:
+            return False
+        
+#OPERAÇÕES DE LISTAGEM
+def lista_clientes(clientes):
+    for cliente in clientes:
+        print("-------------------------------------")
+        for k,v in cliente.items():
+            print(f"{k} : {v}")
+    
+def lista_contas(contas):
+    for conta in contas:
+        print("-------------------------------------")
+        for k,v in conta.items():
+            print(f"{k}: {v}")
+
+
+#OPERAÇÕES PARA ACHAR DADOS
 def achaCliente(cpf):
     for cliente in usuarios:
         if cliente["CPF"] == cpf:
             return True
         else:
             return False
+
+def acha_agencia(numero_agencia):
+    for conta in contas:
+        if conta["Número da Conta"] == numero_agencia:
+            return conta
+          
 while True:
     print(menu)
     print("Digite uma opção")
@@ -120,28 +147,38 @@ while True:
     if opcao == "s":
         print("SAQUE")
         transacao = float(input())
-        sacar(transacao,saques,LIMITES_SAQUE)
+        agencia = input("Digite o número da Conta: ")
+        if checa_agencia(agencia):       
+            sacar(transacao,saques,LIMITES_SAQUE,agencia)
+        else:
+            print("Número de Agência não encontrado!")
+
     elif opcao == "d":
         print("DEPÓSITO")
         print("Quanto deseja depositar")
         transacao = float(input())
-        depositar(transacao=transacao)
-        print(f"Saldo atual:{deposito}")
+        num_agencia = input("Digite o número da Conta")
+        if(checa_agencia(num_agencia)):        
+            depositar(transacao=transacao,numero_agencia=num_agencia)
+        else:
+            print("Número da Conta não encontrado")
 
     elif opcao == "e":
         print("EXTRATO")
         print(extrato)
+
     elif opcao == "cu":
         print("CRIAR USUÁRIO")
         criar_usuario(usuarios)
+
     elif opcao == "cc":
         print("CRIAR CONTA")
         criar_conta(contas)
-    elif opcao == "l":
+
+    elif opcao == "lu":
         lista_clientes(usuarios)
-    elif opcao == "q":
-        print("LISTAR CLIENTES")
-        lista_clientes(usuarios)
+    elif opcao =="lc":
+        lista_contas(contas)
     elif opcao == "q":
         break;
     else:
