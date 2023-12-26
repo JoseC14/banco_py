@@ -39,7 +39,7 @@ def sacar(valor,saques,LIMITES_SAQUE,numero_agencia, /):
             conta["Saldo"] -= valor
             saques   += 1
             print("Saque efetuado com sucesso!")
-            extrato = extrato + "Saque: R$"+str(valor)+"\n"
+            conta["Extrato"] = conta["Extrato"] + "Saque: R$"+str(valor)+"\n"
             break
 
 
@@ -48,7 +48,7 @@ def depositar(*,transacao,numero_agencia):
     conta = acha_agencia(numero_agencia)
     conta["Saldo"] += transacao
     print("Depósito feito com sucesso!")
-    extrato = extrato + "Depósito: R$"+str(transacao)+"\n"
+    conta["Extrato"] = conta["Extrato"] + "Depósito: R$"+str(transacao)+"\n"
 
 
 #OPERAÇÕES DE CRIAR CONTAS
@@ -93,7 +93,8 @@ def criar_conta(contas):
         "Número da Conta": numero_conta,
         "Agência": agencia,
         "CPF" : cpf,
-        "Saldo" : 0
+        "Saldo" : 0,
+        "Extrato" : ""
     })
 
 #OPERAÇÕES DE CHECAGEM
@@ -139,7 +140,17 @@ def acha_agencia(numero_agencia):
     for conta in contas:
         if conta["Número da Conta"] == numero_agencia:
             return conta
-          
+
+def ver_extrato(tipo,num_conta,contas):
+    if tipo == "1":
+        for conta in contas:
+            if conta["Número da Conta"] == num_conta:
+                print(conta["Extrato"])
+    elif tipo == "2":
+        for conta in contas:
+            if conta["CPF"] == num_conta:
+                print(conta["Extrato"])
+
 while True:
     print(menu)
     print("Digite uma opção")
@@ -165,7 +176,16 @@ while True:
 
     elif opcao == "e":
         print("EXTRATO")
-        print(extrato)
+        print("VOcê deseja ver o extrato de uma conta ou de todas as suas contas?")
+        print("(1) de Apenas uma conta")
+        print("(2) de Todas minhas contas cadastradas")
+        opcao = input()
+        if opcao == "1":
+            num_conta = input("Digite o número da conta: ")
+        elif opcao == "2":
+            num_conta = input("Digite seu cpf")
+
+        ver_extrato(num_conta,contas)
 
     elif opcao == "cu":
         print("CRIAR USUÁRIO")
